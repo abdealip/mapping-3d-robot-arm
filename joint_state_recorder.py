@@ -1,10 +1,18 @@
 #!/usr/bin/python3
 
 import rospy
-import time
 import numpy as np
 
 from sensor_msgs.msg import JointState
+
+'''
+This file listens to the /joint_states ROS topic and writes the results to a file
+This topic is published at 50 Hz
+However, if the robot is not moving, this will not continuously write the same joint pose to the
+file. This is because these poses would be a waste, as this file of compiled joint states is 
+intended to be used for mapping.
+'''
+
 
 def joint_angles_close(position1, position2, threshold):
     if position1 == None or position2 == None:
@@ -53,6 +61,7 @@ class JointRecorder:
         self.outfile.close()
 
 if __name__ == "__main__":
+    # TODO - make filename and --append command line options
     jr = JointRecorder("joint_states.csv", False)
     jr.spin()
     jr.cleanup()
