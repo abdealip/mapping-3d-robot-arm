@@ -105,7 +105,6 @@ class Grid3D:
         Returns an Nx3 array where each row is an xyz coordinate matching value
         '''
         index_range = self.cartesian_range_to_index_range([x_range[0], y_range[0], z_range[0], x_range[1], y_range[1], z_range[1]])
-        print(index_range)
         result = []
         for xi in range(index_range[0], index_range[3]+1):
             for yi in range(index_range[1], index_range[4]+1):

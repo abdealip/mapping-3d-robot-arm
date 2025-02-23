@@ -1,7 +1,9 @@
+from typing import List
 import numpy as np
 import json
 from grid3D import Grid3D
 from cylinder import Cylinder
+from forward_kinematics import Twist, TransformableCylinder
 
 class Mapper:
     def __init__(self, json_file):
@@ -13,8 +15,19 @@ class Mapper:
         voxel_size = self.config["voxel_size"]
         self.map = Grid3D(x_range, y_range, z_range, voxel_size, 1)
 
-        # TODO - initialize mapping cylinders from config
-        # TODO - initialize joint twists from config, make forward kinematic functions
+        twists = self.config["joint_twists"]
+        self.twists = [Twist(twist) for twist in twists]
+
+        links = self.config["links"]
+        self.cylinders: List[TransformableCylinder] = []
+        for link in links:
+            if link["type"] == "cylinder":
+                n_twists = link["twists"]
+                self.cylinders.append(TransformableCylinder(link["mapping_radius"],
+                                                            link["length"],
+                                                            link["axis"],
+                                                            link["reference_config"],
+                                                            self.twists[:n_twists]))
 
     def read_from_file(self, map_filename):
         self.map = Grid3D.init_from_file(map_filename)
@@ -22,13 +35,15 @@ class Mapper:
     def write_to_file(self, map_filename):
         self.map.write_to_file(map_filename)
 
-    def consume_joint_pose(self, pose):
-        #TODO - use pose to update base point and direction of cylinders
-        #TODO - update based on all cylinders
-        cyl = Cylinder(0.2, 3, base_point=[0, 0, 0], direction = [1, 1, 1])
-        self.map.set_all_points_within_cylinder_to_value(0, cyl)
+    def consume_joint_angles(self, joint_angles):
+        if len(joint_angles) != len(self.twists):
+            print("ERROR: differing number of joint angles and joint twists")
+            return
+        for cylinder in self.cylinders:
+            cylinder.transform(joint_angles)
+            self.map.set_all_points_within_cylinder_to_value(0, cylinder)
 
 if __name__ == "__main__":
     m = Mapper("map_config.json")
-    m.consume_joint_pose(5)
+    m.consume_joint_angles([np.pi/4, np.pi/6, -np.pi/2, 0, 0, 0])
     m.write_to_file("test.map")

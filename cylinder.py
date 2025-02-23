@@ -16,7 +16,7 @@ class Cylinder:
     def get_bounds_x(self):
         top_point = self.base_point + self.length * self.direction
         proj_length_yz_plane = np.linalg.norm(top_point[1:] - self.base_point[1:])
-        angle_with_yz_plane = np.arctan((top_point[0] - self.base_point[0])/proj_length_yz_plane)
+        angle_with_yz_plane = np.arctan2(top_point[0] - self.base_point[0], proj_length_yz_plane)
         xmin = min(self.base_point[0] - self.radius*np.cos(angle_with_yz_plane), top_point[0] - self.radius*np.cos(angle_with_yz_plane))
         xmax = max(top_point[0] + self.radius*np.cos(angle_with_yz_plane), self.base_point[0] + self.radius*np.cos(angle_with_yz_plane))
         return [xmin, xmax]
@@ -24,7 +24,7 @@ class Cylinder:
     def get_bounds_y(self):
         top_point = self.base_point + self.length * self.direction
         proj_length_xz_plane = np.linalg.norm(top_point[0::2] - self.base_point[0::2])
-        angle_with_xz_plane = np.arctan((top_point[1] - self.base_point[1])/proj_length_xz_plane)
+        angle_with_xz_plane = np.arctan2(top_point[1] - self.base_point[1], proj_length_xz_plane)
         ymin = min(self.base_point[1] - self.radius*np.cos(angle_with_xz_plane), top_point[1] - self.radius*np.cos(angle_with_xz_plane))
         ymax = max(top_point[1] + self.radius*np.cos(angle_with_xz_plane), self.base_point[1] + self.radius*np.cos(angle_with_xz_plane))
         return [ymin, ymax]
@@ -32,7 +32,7 @@ class Cylinder:
     def get_bounds_z(self):
         top_point = self.base_point + self.length * self.direction
         proj_length_xy_plane = np.linalg.norm(top_point[:2] - self.base_point[:2])
-        angle_with_xy_plane = np.arctan((top_point[2] - self.base_point[2])/proj_length_xy_plane)
+        angle_with_xy_plane = np.arctan2(top_point[2] - self.base_point[2], proj_length_xy_plane)
         zmin = min(self.base_point[2] - self.radius*np.cos(angle_with_xy_plane), top_point[2] - self.radius*np.cos(angle_with_xy_plane))
         zmax = max(top_point[2] + self.radius*np.cos(angle_with_xy_plane), self.base_point[2] + self.radius*np.cos(angle_with_xy_plane))
         return [zmin, zmax]

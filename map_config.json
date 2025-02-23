@@ -27,7 +27,7 @@
         },
         {
             "type": "cylinder",
-            "description": "Wide of joint connecting arm 1 to arm 2",
+            "description": "Wide part of joint connecting arm 1 to arm 2",
             "twists": 2,
             "reference_config": [[1, 0, 0, 0.1],
                                  [0, 1, 0, 0],
