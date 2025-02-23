@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 
-import rospy
 import numpy as np
+from argparse import ArgumentParser
 
+import rospy
 from sensor_msgs.msg import JointState
 
 '''
@@ -12,7 +13,6 @@ However, if the robot is not moving, this will not continuously write the same j
 file. This is because these poses would be a waste, as this file of compiled joint states is 
 intended to be used for mapping.
 '''
-
 
 def joint_angles_close(position1, position2, threshold):
     if position1 == None or position2 == None:
@@ -27,7 +27,7 @@ def joint_angles_close(position1, position2, threshold):
     
     return True
 
-class JointRecorder:
+class JointLogger:
     def __init__(self, outfile_name: str, append: bool):
         self.outfile = open(outfile_name, "a" if append else "w")
         rospy.init_node("joint_listener", anonymous=True)
@@ -61,7 +61,10 @@ class JointRecorder:
         self.outfile.close()
 
 if __name__ == "__main__":
-    # TODO - make filename and --append command line options
-    jr = JointRecorder("joint_states.csv", False)
-    jr.spin()
-    jr.cleanup()
+    parser = ArgumentParser()
+    parser.add_argument("-f", "--filename", type=str, required=True, help="Filename to Save Output To")
+    parser.add_argument("-a", "--append", action="store_true", help="Whether to append")
+    args = vars(parser.parse_args())
+    logger = JointLogger(args["filename"], args["append"])
+    logger.spin()
+    logger.cleanup()

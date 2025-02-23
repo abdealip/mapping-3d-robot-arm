@@ -1,4 +1,5 @@
 import numpy as np
+from queue import Queue
 
 from cylinder import Cylinder
 
@@ -29,7 +30,7 @@ class Grid3D:
             outf.writelines(lines)
 
     @classmethod
-    def init_from_file(self, filename):
+    def init_from_file(cls, filename):
         grid = None
         with open(filename, "r") as f:
             lines = f.readlines()
@@ -44,13 +45,16 @@ class Grid3D:
             voxel_size = float(resolutionline[1])
             shape = [int(shapeline[1]), int(shapeline[2]), int(shapeline[3])]
 
-            grid = Grid3D(x_range, y_range, z_range, voxel_size, 0)
+            grid = cls(x_range, y_range, z_range, voxel_size, 0)
             data = np.array([int(datum) for datum in dataline[1:]])
             grid.voxels = data.reshape(shape)
         return grid
 
     def in_range(self, x, y, z) -> bool:
         return (x > self.xmin and x < self.xmax and y > self.ymin and y < self.ymax and z > self.zmin and z < self.zmax)
+
+    def idx_in_range(self, x_i, y_i, z_i) -> bool:
+        return (x_i >= 0 and x_i < self.xdim and y_i >= 0 and y_i < self.ydim and z_i >= 0 and z_i < self.zdim)
 
     def set_voxel_at(self, x, y, z, value):
         if self.in_range(x, y, z):
@@ -65,6 +69,19 @@ class Grid3D:
             return self.voxels[idxs[0], idxs[1], idxs[2]]
         else:
             print("ERROR: Out of range (get_voxel_at)")
+            return None
+
+    def set_voxel_at_idx(self, x_i, y_i, z_i, value):
+        if self.idx_in_range(x_i, y_i, z_i):
+            self.voxels[x_i, y_i, z_i] = value
+        else:
+            print("ERROR: Out of range (set_voxel_at_idx)")
+
+    def get_voxel_at_idx(self, x_i, y_i, z_i):
+        if self.idx_in_range(x_i, y_i, z_i):
+            return self.voxels[x_i, y_i, z_i]
+        else:
+            print("ERROR: Out of range (get_voxel_at_idx)")
             return None
 
     def index_to_cartesian(self, xi, yi, zi):
@@ -120,7 +137,7 @@ class Grid3D:
         cartesian_bounds = cylinder.get_bounding_box()
         return self.cartesian_range_to_index_range(cartesian_bounds)
 
-    def set_all_points_within_cylinder_to_value(self, value, cylinder: Cylinder):
+    def update_points_within_cylinder(self, value, cylinder: Cylinder):
         bounds = self.cylinder_bounding_box(cylinder)
         for xi in range(bounds[0], bounds[3]+1):
             for yi in range(bounds[1], bounds[4]+1):
@@ -128,3 +145,55 @@ class Grid3D:
                     point = self.index_to_cartesian(xi, yi, zi)
                     if cylinder.contains_point(point):
                         self.voxels[xi, yi, zi] = value
+
+class BooleanGrid3D(Grid3D):
+    def __init__(self, x_range, y_range, z_range, voxel_size, visualization_queue: Queue = None):
+        super().__init__(x_range, y_range, z_range, voxel_size, 1)
+
+        # list of points whose value is 0
+        self.changed_points = []
+
+        self.visualization_queue = visualization_queue
+
+    def set_voxel_at_idx(self, x_i, y_i, z_i):
+        if self.idx_in_range(x_i, y_i, z_i):
+            if self.voxels[x_i, y_i, z_i]:
+                self.changed_points.append(self.index_to_cartesian(x_i, y_i, z_i))
+                self.voxels[x_i, y_i, z_i] = 0
+        else:
+            print("ERROR: Out of range (set_voxel_at_idx)")
+
+    def update_points_within_cylinder(self, cylinder: Cylinder):
+        bounds = self.cylinder_bounding_box(cylinder)
+        num_free = len(self.changed_points)
+        for xi in range(bounds[0], bounds[3]+1):
+            for yi in range(bounds[1], bounds[4]+1):
+                for zi in range(bounds[2], bounds[5]+1):
+                    point = self.index_to_cartesian(xi, yi, zi)
+                    if cylinder.contains_point(point):
+                        self.set_voxel_at_idx(xi, yi, zi)
+        new_num_free = len(self.changed_points)
+        if new_num_free > num_free and self.visualization_queue != None:
+            # push the newly free space points into the visualization queue
+            self.visualization_queue.put(self.changed_points[num_free:])
+
+    @classmethod
+    def init_from_file(cls, filename, visualization_queue: Queue = None):
+        grid = None
+        with open(filename, "r") as f:
+            lines = f.readlines()
+            rangeline = lines[0].split(' ')
+            resolutionline = lines[1].split(' ')
+            shapeline = lines[2].split(' ')
+            dataline = lines[3].split(' ')
+            
+            x_range = [float(rangeline[1]), float(rangeline[2])]
+            y_range = [float(rangeline[3]), float(rangeline[4])]
+            z_range = [float(rangeline[5]), float(rangeline[6])]
+            voxel_size = float(resolutionline[1])
+            shape = [int(shapeline[1]), int(shapeline[2]), int(shapeline[3])]
+
+            grid = cls(x_range, y_range, z_range, voxel_size, visualization_queue)
+            data = np.array([int(datum) for datum in dataline[1:]])
+            grid.voxels = data.reshape(shape)
+        return grid
