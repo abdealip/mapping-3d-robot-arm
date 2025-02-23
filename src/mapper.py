@@ -1,8 +1,8 @@
+import os
 from typing import List
 import numpy as np
 import json
 from grid3D import Grid3D
-from cylinder import Cylinder
 from forward_kinematics import Twist, TransformableCylinder
 
 class Mapper:
@@ -44,6 +44,9 @@ class Mapper:
             self.map.set_all_points_within_cylinder_to_value(0, cylinder)
 
 if __name__ == "__main__":
-    m = Mapper("map_config.json")
+    base_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)))
+    config_file = os.path.join(base_dir, "config", "map_config.json")
+    map_file = os.path.join(base_dir, "data", "test.map")
+    m = Mapper(config_file)
     m.consume_joint_angles([np.pi/4, np.pi/6, -np.pi/2, 0, 0, 0])
-    m.write_to_file("test.map")
+    m.write_to_file(map_file)

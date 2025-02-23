@@ -1,7 +1,12 @@
+import os
 from grid3D import Grid3D
 import matplotlib.pyplot as plt
 
-grid = Grid3D.init_from_file("test.map")
+base_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)))
+config_file = os.path.join(base_dir, "config", "map_config.json")
+map_file = os.path.join(base_dir, "data", "test.map")
+
+grid = Grid3D.init_from_file(map_file)
 # occupied_points = grid.get_all_points_matching_value(1)
 
 not_occupied_points = grid.get_all_points_matching_value(0)
