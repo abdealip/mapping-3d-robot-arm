@@ -1,5 +1,7 @@
 import numpy as np
 
+from cylinder import Cylinder
+
 class Grid3D:
     def __init__(self, x_range, y_range, z_range, voxel_size, initial_value: int):
         self.xmin = x_range[0]
@@ -50,12 +52,6 @@ class Grid3D:
     def in_range(self, x, y, z) -> bool:
         return (x > self.xmin and x < self.xmax and y > self.ymin and y < self.ymax and z > self.zmin and z < self.zmax)
 
-    def cartesian_to_idxs(self, x, y, z):
-        x_idx = (x - self.xmin) // self.voxel_size
-        y_idx = (y - self.ymin) // self.voxel_size
-        z_idx = (z - self.zmin) // self.voxel_size
-        return (x_idx, y_idx, z_idx)
-
     def set_voxel_at(self, x, y, z, value):
         if self.in_range(x, y, z):
             idxs = self.cartesian_to_idxs(x, y, z)
@@ -71,30 +67,65 @@ class Grid3D:
             print("ERROR: Out of range (get_voxel_at)")
             return None
 
-    def index_to_cartesian()
+    def index_to_cartesian(self, xi, yi, zi):
+        x = self.xmin + self.voxel_size * (xi + 0.5)
+        y = self.ymin + self.voxel_size * (yi + 0.5)
+        z = self.zmin + self.voxel_size * (zi + 0.5)
+        return [x, y, z]
+
+    def cartesian_to_idxs(self, x, y, z):
+        x_idx = int((x - self.xmin) // self.voxel_size)
+        y_idx = int((y - self.ymin) // self.voxel_size)
+        z_idx = int((z - self.zmin) // self.voxel_size)
+        return [x_idx, y_idx, z_idx]
+
+    def cartesian_range_to_index_range(self, cartesian_range):
+        '''
+        format: [xmin, ymin, zmin, xmax, ymax, zmax]
+        '''
+        min_idx = self.cartesian_to_idxs(cartesian_range[0], cartesian_range[1], cartesian_range[2])
+        max_idx = self.cartesian_to_idxs(cartesian_range[3], cartesian_range[4], cartesian_range[5])
+
+        # clamp to be within grid
+        for dim in range(len(self.voxels.shape)):
+            if min_idx[dim] < 0:
+                min_idx[dim] = 0
+            if max_idx[dim] >= self.voxels.shape[dim]:
+                max_idx[dim] = self.voxels.shape[dim] - 1
+        return min_idx + max_idx
 
     def get_all_points_matching_value(self, value):
         '''
         Returns an Nx3 array where each row is an xyz coordinate matching value
         '''
+        return self.get_all_points_in_range_matching_value(value, [self.xmin, self.xmax], [self.ymin, self.ymax], [self.zmin, self.zmax])
+
+    def get_all_points_in_range_matching_value(self, value, x_range, y_range, z_range):
+        '''
+        Returns an Nx3 array where each row is an xyz coordinate matching value
+        '''
+        index_range = self.cartesian_range_to_index_range([x_range[0], y_range[0], z_range[0], x_range[1], y_range[1], z_range[1]])
+        print(index_range)
         result = []
-        for xi in range(self.xdim):
-            for yi in range(self.ydim):
-                for zi in range(self.zdim):
+        for xi in range(index_range[0], index_range[3]+1):
+            for yi in range(index_range[1], index_range[4]+1):
+                for zi in range(index_range[2], index_range[5]+1):
                     if self.voxels[xi, yi, zi] == value:
-                        x = self.xmin + self.voxel_size * (xi + 0.5)
-                        y = self.ymin + self.voxel_size * (yi + 0.5)
-                        z = self.zmin + self.voxel_size * (zi + 0.5)
-                        result.append([x, y, z])
+                        result.append(self.index_to_cartesian(xi, yi, zi))
         return np.array(result)
 
-    def set_all_points_within_cylinder_to_value(self, value, cylinder_base_point, axis, length, radius):
+    def cylinder_bounding_box(self, cylinder: Cylinder):
         '''
-        value: integer value
-        cylinder_base_point: 3D point in base frame
-        axis: vector describing axis of cylinder in base frame
-        length: length of cylinder
-        radius: radius of cylinder
+        Which cubic subset of the grid the cylinder is within
         '''
+        cartesian_bounds = cylinder.get_bounding_box()
+        return self.cartesian_range_to_index_range(cartesian_bounds)
 
-        pass
+    def set_all_points_within_cylinder_to_value(self, value, cylinder: Cylinder):
+        bounds = self.cylinder_bounding_box(cylinder)
+        for xi in range(bounds[0], bounds[3]+1):
+            for yi in range(bounds[1], bounds[4]+1):
+                for zi in range(bounds[2], bounds[5]+1):
+                    point = self.index_to_cartesian(xi, yi, zi)
+                    if cylinder.contains_point(point):
+                        self.voxels[xi, yi, zi] = value
