@@ -1,1 +1,7 @@
 Joint states published at 50 Hz
+
+Voxel Size, Update Time
+0.01, 0.854
+0.02, 0.115
+0.025, 0.063
+
