@@ -23,7 +23,7 @@ class OfflineMapper(Mapper):
             row = self.df.iloc[i]
             timestamp = row["timestamp"]/1e9
             joint_angles = [row["joint1"], row["joint2"], row["joint3"], row["joint4"], row["joint5"], row["joint6"]]
-            if self.consume_joint_angles(joint_angles, timestamp/1e9, profile):
+            if self.consume_joint_angles(joint_angles, timestamp, profile):
                 poses_consumed += 1
                 if poses_consumed % 20 == 0:
                     print(f"Consumed {poses_consumed} poses")

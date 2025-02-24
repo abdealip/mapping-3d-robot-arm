@@ -88,7 +88,7 @@ class Mapper:
         if self.last_joint_angles != None and joint_angles_close(self.last_joint_angles, joint_angles, self.min_joint_movement_radians):
             return False
 
-        if self.last_timestamp != None and timestamp - self.last_timestamp > self.sample_time_seconds:
+        if self.last_timestamp != None and timestamp - self.last_timestamp < self.sample_time_seconds:
             return False
 
         self.last_joint_angles = joint_angles

@@ -3,7 +3,7 @@
     "y_range": [-0.5, 1.01],
     "z_range": [-0.5, 1.01],
     "voxel_size": 0.02,
-    "min_joint_movement_degrees": 3,
+    "min_joint_movement_degrees": 0.1,
     "sample_time_seconds": 0.1,
     "joint_twists": [
         [0,     0, 0,  0, 0, -1],
