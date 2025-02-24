@@ -1,48 +1,26 @@
 #!/usr/bin/python3
 
 import os
-from grid3D import Grid3D
+import numpy as np
 import matplotlib.pyplot as plt
 from argparse import ArgumentParser
 
-base_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)))
+from grid3D import BooleanGrid3D
+from freespace_plotter import FreespacePlotter, ViewEnum
 
-parser = ArgumentParser()
-parser.add_argument("-m", "--map", type=str, required=True, help="Map File to Visualize")
-parser.add_argument("-t", "--title", type=str, help="Plot Title")
-parser.add_argument("-v", "--view", type=str, choices=["iso", "right", "front", "top"], default="iso")
-args = vars(parser.parse_args())
+if __name__ == "__main__":
+    base_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)))
 
-grid = Grid3D.init_from_file(args["map"])
-freespace_points = grid.get_all_points_matching_value(0)
+    parser = ArgumentParser()
+    parser.add_argument("-m", "--map", type=str, required=True, help="Map File to Visualize")
+    parser.add_argument("-t", "--title", type=str, default="Map", help="Plot Title")
+    parser.add_argument("-v", "--view", type=str, choices=[e.value for e in ViewEnum], default=ViewEnum.ISO.value)
+    args = vars(parser.parse_args())
 
-fig = plt.figure()
-ax = fig.add_subplot(projection='3d')
+    grid = BooleanGrid3D.init_from_file(args["map"])
+    freespace_points = np.array(grid.changed_points)
 
-ax.scatter(freespace_points[:, 0], freespace_points[:, 1], freespace_points[:, 2], s=1)
-
-plt.legend(["Free"])
-if "title" in args:
-    plt.title(args["title"])
-else:
-    plt.title("Free Space")
-
-ax.axes.set_xlim3d(-0.5, 1.0)
-ax.axes.set_ylim3d(-0.5, 1.0)
-ax.axes.set_zlim3d(-0.5, 1.0)
-ax.axes.set_box_aspect((1, 1, 1))
-
-ax.set_xlabel("x")
-ax.set_ylabel("y")
-ax.set_zlabel("z")
-
-if args["view"] == "iso":
-    ax.view_init(elev=30, azim=45)
-elif args["view"] == "right":
-    ax.view_init(elev=0, azim=0)
-elif args["view"] == "front":
-    ax.view_init(elev=0, azim=-90)
-elif args["view"] == "top":
-    ax.view_init(elev=90, azim=-90)
-
-plt.show()
+    plotter = FreespacePlotter(ViewEnum(args["view"]), args["title"], [grid.xmin, grid.xmax],
+                               [grid.ymin, grid.ymax], [grid.zmin, grid.zmax], interactive=False)
+    plotter.add_points(freespace_points)
+    plt.show()

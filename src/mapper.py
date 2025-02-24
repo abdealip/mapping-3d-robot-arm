@@ -3,11 +3,11 @@ import json
 import time
 import signal
 import threading
+import numpy as np
 from typing import List
-import matplotlib.pyplot as plt
 
 from grid3D import BooleanGrid3D
-from forward_kinematics import Twist, TransformableCylinder
+from forward_kinematics import Twist, TransformableCylinder, joint_angles_close
 from freespace_plotter import ViewEnum, FreespacePlotter
 
 exit_event = threading.Event()
@@ -59,17 +59,40 @@ class Mapper:
                 self.img_idx_file = open(os.path.join(video_dir, "img_index.csv"), "w")
                 self.img_idx_file.write("imgfile,timestamp\n")
 
+        self.total_update_runtime = 0   # total update runtime for this session
+        self.num_updates = 0            # number of pose updates that have happened in this session
+        self.num_poses = 0              # total number of poses used to build this map
+
+        self.min_joint_movement_radians = self.config["min_joint_movement_degrees"] * np.pi/180
+        self.sample_time_seconds = self.config["sample_time_seconds"]
+
+        self.last_joint_angles = None
+        self.last_timestamp = None
 
     def read_from_file(self, map_filename):
-        self.map = BooleanGrid3D.init_from_file(map_filename)
+        with open(map_filename, "r") as f:
+            self.map = BooleanGrid3D.init_from_file(f)
+            num_poses_line = f.readline().split()
+            self.num_poses = int(num_poses_line[1])
 
     def write_to_file(self, map_filename):
-        self.map.write_to_file(map_filename)
+        with open(map_filename, "w") as f:
+            self.map.write_to_file(f)
+            f.write(f"num_updates: {self.num_updates}")
 
     def consume_joint_angles(self, joint_angles, timestamp, profile=False):
         if len(joint_angles) != len(self.twists):
             print("ERROR: differing number of joint angles and joint twists")
-            return
+            return False
+
+        if self.last_joint_angles != None and joint_angles_close(self.last_joint_angles, joint_angles, self.min_joint_movement_radians):
+            return False
+
+        if self.last_timestamp != None and timestamp - self.last_timestamp > self.sample_time_seconds:
+            return False
+
+        self.last_joint_angles = joint_angles
+        self.last_timestamp = timestamp
 
         if self.do_live_display:
             self.map.mark_start_of_update()
@@ -82,8 +105,7 @@ class Mapper:
             self.map.update_points_within_cylinder(cylinder)
 
         if profile:
-            timediff = time.time() - start_time
-            print(f"Map update took {timediff:.2f} seconds")
+            self.total_update_runtime += time.time() - start_time
 
         if self.do_live_display:
             new_points = self.map.get_changed_points_since_update()
@@ -96,6 +118,22 @@ class Mapper:
                     self.img_idx_file.flush()
                     self.frame_idx += 1
 
+        self.num_updates += 1
+        self.num_poses += 1
+        return True
+
     def cleanup(self):
-        if self.video_dir != None:
+        if self.do_live_display and self.video_dir != None:
             self.img_idx_file.close()
+
+    def get_average_update_runtime(self):
+        if self.num_updates == 0:
+            return None
+        else:
+            return self.total_update_runtime / self.num_updates
+
+    def get_num_poses_consumed(self):
+        return self.num_poses
+
+    def get_num_free_cells(self):
+        return self.map.get_num_free_cells()

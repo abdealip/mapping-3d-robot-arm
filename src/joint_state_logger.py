@@ -6,6 +6,8 @@ from argparse import ArgumentParser
 import rospy
 from sensor_msgs.msg import JointState
 
+from forward_kinematics import joint_angles_close
+
 '''
 This file listens to the /joint_states ROS topic and writes the results to a file
 This topic is published at 50 Hz
@@ -13,19 +15,6 @@ However, if the robot is not moving, this will not continuously write the same j
 file. This is because these poses would be a waste, as this file of compiled joint states is 
 intended to be used for mapping.
 '''
-
-def joint_angles_close(position1, position2, threshold):
-    if position1 == None or position2 == None:
-        return False
-    
-    if (len(position1) != len(position2)):
-        return False
-    
-    for i in range(len(position1)):
-        if abs(position1[i] - position2[i]) > threshold:
-            return False
-    
-    return True
 
 class JointLogger:
     def __init__(self, outfile_name: str, append: bool):

@@ -2,17 +2,20 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from enum import IntEnum
+from enum import Enum
 
-class ViewEnum(IntEnum):
-    ISO = 0,
-    RIGHT = 1,
-    FRONT = 2,
-    TOP = 3
+class ViewEnum(Enum):
+    ISO = "iso"
+    RIGHT = "right"
+    FRONT = "front"
+    TOP = "top"
 
 class FreespacePlotter:
-    def __init__(self, view: ViewEnum, title, xlim, ylim, zlim) -> None:
-        plt.ion()
+    def __init__(self, view: ViewEnum, title, xlim, ylim, zlim, interactive=True) -> None:
+        if interactive:
+            plt.ion()
+
+        self.interactive = interactive
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(projection='3d')
         self.ax.axes.set_xlim3d(xlim[0], xlim[1])
@@ -34,7 +37,8 @@ class FreespacePlotter:
             self.ax.view_init(elev=90, azim=-90)
 
         plt.title(title)
-        plt.legend(["Free"])
+
+        self.legend_shown = False
 
     def update(self):
         self.fig.canvas.draw()
@@ -42,7 +46,13 @@ class FreespacePlotter:
 
     def add_points(self, points):
         self.ax.scatter(points[:, 0], points[:, 1], points[:, 2], s=1, c="#1f77b4")
-        self.update()
+
+        if not self.legend_shown:
+            plt.legend(["Free"])
+            self.legend_shown = True
+
+        if self.interactive:
+            self.update()
 
     def cleanup(self):
         plt.close(self.fig)

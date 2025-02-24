@@ -4,6 +4,19 @@ import numpy as np
 
 from cylinder import Cylinder
 
+def joint_angles_close(position1, position2, threshold):
+    if position1 == None or position2 == None:
+        return False
+    
+    if (len(position1) != len(position2)):
+        return False
+    
+    for i in range(len(position1)):
+        if abs(position1[i] - position2[i]) > threshold:
+            return False
+    
+    return True
+
 class TwistType(IntEnum):
     REVOLUTE = 0,
     PRISMATIC = 1,

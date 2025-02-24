@@ -18,36 +18,34 @@ class Grid3D:
         self.zdim = int((self.zmax - self.zmin) // self.voxel_size)
         self.voxels = np.full([self.xdim, self.ydim, self.zdim], initial_value, dtype=int)
 
-    def write_to_file(self, filename):
-        with open(filename, "w") as outf:
-            lines = []
-            lines.append(f"range: {self.xmin} {self.xmax} {self.ymin} {self.ymax} {self.zmin} {self.zmax}\n")
-            lines.append(f"resolution: {self.voxel_size}\n")
-            lines.append(f"shape: {self.xdim} {self.ydim} {self.zdim}\n")
-            data = self.voxels.flatten()
-            data_str = " ".join([str(datum) for datum in data])
-            lines.append(f"data: {data_str}\n")
-            outf.writelines(lines)
+    def write_to_file(self, outf):
+        lines = []
+        lines.append(f"range: {self.xmin} {self.xmax} {self.ymin} {self.ymax} {self.zmin} {self.zmax}\n")
+        lines.append(f"resolution: {self.voxel_size}\n")
+        lines.append(f"shape: {self.xdim} {self.ydim} {self.zdim}\n")
+        data = self.voxels.flatten()
+        data_str = " ".join([str(datum) for datum in data])
+        lines.append(f"data: {data_str}\n")
+        outf.writelines(lines)
 
     @classmethod
-    def init_from_file(cls, filename):
+    def init_from_file(cls, f):
         grid = None
-        with open(filename, "r") as f:
-            lines = f.readlines()
-            rangeline = lines[0].split(' ')
-            resolutionline = lines[1].split(' ')
-            shapeline = lines[2].split(' ')
-            dataline = lines[3].split(' ')
-            
-            x_range = [float(rangeline[1]), float(rangeline[2])]
-            y_range = [float(rangeline[3]), float(rangeline[4])]
-            z_range = [float(rangeline[5]), float(rangeline[6])]
-            voxel_size = float(resolutionline[1])
-            shape = [int(shapeline[1]), int(shapeline[2]), int(shapeline[3])]
+        
+        rangeline = f.readline().split(' ')
+        resolutionline = f.readline().split(' ')
+        shapeline = f.readline().split(' ')
+        dataline = f.readline().split(' ')
+        
+        x_range = [float(rangeline[1]), float(rangeline[2])]
+        y_range = [float(rangeline[3]), float(rangeline[4])]
+        z_range = [float(rangeline[5]), float(rangeline[6])]
+        voxel_size = float(resolutionline[1])
+        shape = [int(shapeline[1]), int(shapeline[2]), int(shapeline[3])]
 
-            grid = cls(x_range, y_range, z_range, voxel_size, 0)
-            data = np.array([int(datum) for datum in dataline[1:]])
-            grid.voxels = data.reshape(shape)
+        grid = cls(x_range, y_range, z_range, voxel_size, 0)
+        data = np.array([int(datum) for datum in dataline[1:]])
+        grid.voxels = data.reshape(shape)
         return grid
 
     def in_range(self, x, y, z) -> bool:
@@ -154,6 +152,26 @@ class BooleanGrid3D(Grid3D):
         self.changed_points = []
         self.num_free_start = 0
 
+    @classmethod
+    def init_from_file(cls, f):
+        grid = None
+        rangeline = f.readline().split(' ')
+        resolutionline = f.readline().split(' ')
+        shapeline = f.readline().split(' ')
+        dataline = f.readline().split(' ')
+        
+        x_range = [float(rangeline[1]), float(rangeline[2])]
+        y_range = [float(rangeline[3]), float(rangeline[4])]
+        z_range = [float(rangeline[5]), float(rangeline[6])]
+        voxel_size = float(resolutionline[1])
+        shape = [int(shapeline[1]), int(shapeline[2]), int(shapeline[3])]
+
+        grid = cls(x_range, y_range, z_range, voxel_size)
+        data = np.array([int(datum) for datum in dataline[1:]])
+        grid.voxels = data.reshape(shape)
+        grid.changed_points = grid.get_all_points_matching_value(0)
+        return grid
+
     def set_voxel_at_idx(self, x_i, y_i, z_i):
         if self.idx_in_range(x_i, y_i, z_i):
             if self.voxels[x_i, y_i, z_i]:
@@ -176,3 +194,6 @@ class BooleanGrid3D(Grid3D):
 
     def get_changed_points_since_update(self):
         return np.array(self.changed_points[self.num_free_start:])
+
+    def get_num_free_cells(self):
+        return len(self.changed_points)
