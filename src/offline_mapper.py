@@ -1,24 +1,32 @@
 #!/usr/bin/python3
 
 import os
+import time
 import pandas as pd
 from argparse import ArgumentParser
 
-from mapper import Mapper
+from mapper import Mapper, exit_event
 
 class OfflineMapper(Mapper):
-    def consume_joint_log(self, joint_filename, sample_time_seconds):
-        df = pd.read_csv(joint_filename)
+    def __init__(self, json_file, sample_time_seconds, joint_file, do_live_display=False, video_dir=None):
+        super().__init__(json_file, do_live_display, video_dir=video_dir)
+
+        self.sample_time_nanoseconds = sample_time_seconds * 1e9
+        self.df = pd.read_csv(joint_file)
+        self.do_live_display = do_live_display
+
+    def process_joint_log_task(self):
         last_timestamp = 0
-        sample_time_nanoseconds = sample_time_seconds * 1e9
         poses_consumed = 0
-        n_rows = len(df)
+        n_rows = len(self.df)
         for i in range(n_rows):
-            row = df.iloc[i]
+            if exit_event.is_set():
+                break
+            row = self.df.iloc[i]
             timestamp = row["timestamp"]
-            if timestamp - last_timestamp > sample_time_nanoseconds:
+            if timestamp - last_timestamp > self.sample_time_nanoseconds:
                 joint_angles = [row["joint1"], row["joint2"], row["joint3"], row["joint4"], row["joint5"], row["joint6"]]
-                self.consume_joint_angles(joint_angles)
+                self.consume_joint_angles(joint_angles, timestamp/1e9)
                 poses_consumed += 1
                 if poses_consumed % 20 == 0:
                     print(f"Consumed {poses_consumed} poses")
@@ -36,8 +44,10 @@ if __name__ == "__main__":
     parser.add_argument("-c", "--config", type=str, default=config_file_default, help=f"JSON Configuration File (default: {config_file_default})")
     parser.add_argument("-s", "--sample-time", type=float, default=0.1, help="Sample Time of Joint States in Seconds")
     parser.add_argument("--live-display", action="store_true", help="Whether to do a live display of the map updating")
+    parser.add_argument("-v", "--video-dir", help="directory to store video data")
     args = vars(parser.parse_args())
 
-    m = OfflineMapper(args["config"], do_live_display=args["live_display"])
-    m.consume_joint_log(args["joint_log"], args["sample_time"])
+    m = OfflineMapper(args["config"], args["sample_time"], args["joint_log"], do_live_display=args["live_display"], video_dir=args["video_dir"])
+    m.process_joint_log_task()
     m.write_to_file(args["map_file"])
+    m.cleanup()

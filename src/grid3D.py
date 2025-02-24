@@ -147,13 +147,12 @@ class Grid3D:
                         self.voxels[xi, yi, zi] = value
 
 class BooleanGrid3D(Grid3D):
-    def __init__(self, x_range, y_range, z_range, voxel_size, visualization_queue: Queue = None):
+    def __init__(self, x_range, y_range, z_range, voxel_size):
         super().__init__(x_range, y_range, z_range, voxel_size, 1)
 
         # list of points whose value is 0
         self.changed_points = []
-
-        self.visualization_queue = visualization_queue
+        self.num_free_start = 0
 
     def set_voxel_at_idx(self, x_i, y_i, z_i):
         if self.idx_in_range(x_i, y_i, z_i):
@@ -163,37 +162,17 @@ class BooleanGrid3D(Grid3D):
         else:
             print("ERROR: Out of range (set_voxel_at_idx)")
 
+    def mark_start_of_update(self):
+        self.num_free_start = len(self.changed_points)
+
     def update_points_within_cylinder(self, cylinder: Cylinder):
         bounds = self.cylinder_bounding_box(cylinder)
-        num_free = len(self.changed_points)
         for xi in range(bounds[0], bounds[3]+1):
             for yi in range(bounds[1], bounds[4]+1):
                 for zi in range(bounds[2], bounds[5]+1):
                     point = self.index_to_cartesian(xi, yi, zi)
                     if cylinder.contains_point(point):
                         self.set_voxel_at_idx(xi, yi, zi)
-        new_num_free = len(self.changed_points)
-        if new_num_free > num_free and self.visualization_queue != None:
-            # push the newly free space points into the visualization queue
-            self.visualization_queue.put(self.changed_points[num_free:])
 
-    @classmethod
-    def init_from_file(cls, filename, visualization_queue: Queue = None):
-        grid = None
-        with open(filename, "r") as f:
-            lines = f.readlines()
-            rangeline = lines[0].split(' ')
-            resolutionline = lines[1].split(' ')
-            shapeline = lines[2].split(' ')
-            dataline = lines[3].split(' ')
-            
-            x_range = [float(rangeline[1]), float(rangeline[2])]
-            y_range = [float(rangeline[3]), float(rangeline[4])]
-            z_range = [float(rangeline[5]), float(rangeline[6])]
-            voxel_size = float(resolutionline[1])
-            shape = [int(shapeline[1]), int(shapeline[2]), int(shapeline[3])]
-
-            grid = cls(x_range, y_range, z_range, voxel_size, visualization_queue)
-            data = np.array([int(datum) for datum in dataline[1:]])
-            grid.voxels = data.reshape(shape)
-        return grid
+    def get_changed_points_since_update(self):
+        return np.array(self.changed_points[self.num_free_start:])
