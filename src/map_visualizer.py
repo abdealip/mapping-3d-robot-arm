@@ -17,7 +17,8 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--view", type=str, choices=[e.value for e in ViewEnum], default=ViewEnum.ISO.value)
     args = vars(parser.parse_args())
 
-    grid = BooleanGrid3D.init_from_file(args["map"])
+    with open(args["map"]) as f:
+        grid = BooleanGrid3D.init_from_file(f)
     freespace_points = np.array(grid.changed_points)
 
     plotter = FreespacePlotter(ViewEnum(args["view"]), args["title"], [grid.xmin, grid.xmax],

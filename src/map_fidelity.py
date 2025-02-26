@@ -14,6 +14,14 @@ maps = [
     "2cm_100ms_5deg.map"
 ]
 
+maps1 = [
+    "2cm_100ms_0deg.map",
+    "2cm_250ms_0deg.map",
+    "2cm_500ms_0deg.map",
+    "2cm_750ms_0deg.map",
+    "2cm_1000ms_0deg.map"
+]
+
 for mapfile in maps:
     map = Mapper(config_file)
     map.read_from_file(os.path.join(base_dir, "data", mapfile))
