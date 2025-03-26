@@ -5,57 +5,59 @@ import numpy as np
 import matplotlib.pyplot as plt
 from freespace_plotter import *
 
-parser = ArgumentParser()
-parser.add_argument("-i", "--input", required=True, help="Input Depth Image")
+class RangeImagePointCloud:
+    def __init__(self, fov=(87, 58), range=[17, 5000], downsample=10):
+        self.fov = fov
+        self.range = range
+        self.downsample = downsample
 
-options = parser.parse_args()
+    def point_cloud_from_range_image(self, depth_image):
 
-depth_image = np.loadtxt(options.input)
+        horizontal_degrees_per_pixel = self.fov[0]/depth_image.shape[1]
+        vertical_degrees_per_pixel = self.fov[1]/depth_image.shape[0]
+        points = []
 
-FOV = (87, 58)  # FOV in degrees (H, V)
+        for row_i, row in enumerate(depth_image):
+            if row_i % self.downsample != 0:
+                continue
+            for col_i, depth_value in enumerate(row):
+                if col_i % self.downsample != 0:
+                    continue
+                if depth_value < self.range[0] or depth_value > self.range[1]:
+                    continue
+                horizontal_angle = (self.fov[0]/2 - col_i * horizontal_degrees_per_pixel) * np.pi/180
+                vertical_angle = (self.fov[1]/2 - row_i * vertical_degrees_per_pixel) * np.pi/180
 
-horizontal_degrees_per_pixel = FOV[0]/depth_image.shape[1]
-vertical_degrees_per_pixel = FOV[1]/depth_image.shape[0]
+                # print(row_i, col_i, depth_value)
+                # print(horizontal_angle)
+                # print(vertical_angle)
 
-RANGE = [17, 5000]
+                # xz_plane_distance = depth_value #* np.cos(vertical_angle)
+                # z = xz_plane_distance # * np.cos(horizontal_angle)
+                # x = -xz_plane_distance * np.sin(horizontal_angle)
+                # y = -depth_value * np.tan(vertical_angle)
+                z = depth_value
+                y = z*np.tan(vertical_angle)
+                x = z*np.tan(horizontal_angle)
+                points.append([-z/1000, -x/1000, y/1000])
+        points = np.array(points)
 
-points = []
+        return points
 
-DOWNSAMPLE = 10
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("-i", "--input", required=True, help="Input Depth Image")
 
-for row_i, row in enumerate(depth_image):
-    if row_i % DOWNSAMPLE != 0:
-        continue
-    for col_i, depth_value in enumerate(row):
-        if col_i % DOWNSAMPLE != 0:
-            continue
-        if depth_value < RANGE[0] or depth_value > RANGE[1]:
-            continue
-        horizontal_angle = (FOV[0]/2 - col_i * horizontal_degrees_per_pixel) * np.pi/180
-        vertical_angle = (FOV[1]/2 - row_i * vertical_degrees_per_pixel) * np.pi/180
+    options = parser.parse_args()
 
-        # print(row_i, col_i, depth_value)
-        # print(horizontal_angle)
-        # print(vertical_angle)
+    depth_image = np.loadtxt(options.input)
 
-        xz_plane_distance = depth_value * np.cos(vertical_angle)
-        z = xz_plane_distance * np.cos(horizontal_angle)
-        x = -xz_plane_distance * np.sin(horizontal_angle)
-        y = -depth_value * np.sin(vertical_angle)
-        points.append([-z/1000, y/1000, x/1000])
+    ripc = RangeImagePointCloud()
+    points = ripc.point_cloud_from_range_image(depth_image)
 
-    #     if len(points) > 1000:
-    #         break
-    
-    # if len(points) > 1000:
-    #     break
+    plotter = FreespacePlotter(ViewEnum.ISO, "Test", [-5, 5], [-5, 5], [-5, 5], interactive=False)
 
-print(len(points))
-points = np.array(points)
+    plotter.add_points(points, "Depth Points")
+    plotter.update()
 
-plotter = FreespacePlotter(ViewEnum.ISO, "Test", [-5, 0], [-2.5, 2.5], [-2.5, 2.5], interactive=False)
-
-plotter.add_points(points, "Depth Points")
-plotter.update()
-
-plt.show()
+    plt.savefig("test.png")
