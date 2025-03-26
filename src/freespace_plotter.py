@@ -44,11 +44,11 @@ class FreespacePlotter:
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
 
-    def add_points(self, points):
+    def add_points(self, points, legend_str="Free"):
         self.ax.scatter(points[:, 0], points[:, 1], points[:, 2], s=1, c="#1f77b4")
 
         if not self.legend_shown:
-            plt.legend(["Free"])
+            plt.legend([legend_str])
             self.legend_shown = True
 
         if self.interactive:
