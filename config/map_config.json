@@ -43,12 +43,24 @@
             "description": "Second Main Arm",
             "twists": 3,
             "reference_config": [[1, 0, 0, 0],
-                                [0, 1, 0, 0],
-                                [0, 0, 1, 0.455],
-                                [0, 0, 0, 1]],
+                                 [0, 1, 0, 0],
+                                 [0, 0, 1, 0.455],
+                                 [0, 0, 0, 1]],
             "radius": 0.05,
             "axis": [0, 0, 1],
             "length": 0.517
+        },
+        {
+            "type": "camera",
+            "description": "RGBD camera mounted to end effector",
+            "twists": 6,
+            "reference_config": [[1, 0, 0, 0],
+                                 [0, 1, 0, 0],
+                                 [0, 0, 1, 1.05],
+                                 [0, 0, 0, 1]],
+            "note": "The z distance is 1.008 m + thickness of mounting brackets (16 mm) + distance from front to back of camera (26 mm)",
+            "fov_horizontal_degrees": 87,
+            "fov_vertical_degrees": 58
         }
     ]
 }
