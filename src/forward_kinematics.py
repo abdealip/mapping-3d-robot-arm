@@ -61,6 +61,21 @@ class Twist:
         else:
             return None
 
+class ForwardKinematics:
+    def __init__(self, twists: List[Twist], reference_config: np.ndarray):
+        self.twists = twists
+        self.reference_config = reference_config
+
+    def body_to_base_tf(self, joint_angles):
+        if len(joint_angles) < len(self.twists):
+            print("ERROR: not enough joint angles")
+            return
+        body_to_base_tf = np.identity(4)
+        for i in range(len(self.twists)):
+            body_to_base_tf = body_to_base_tf @ self.twists[i].matrix_exponential(joint_angles[i])
+        body_to_base_tf = body_to_base_tf @ self.reference_config
+        return body_to_base_tf
+
 class TransformableCylinder(Cylinder):
     def __init__(self, radius, length, body_frame_direction, reference_config, twists: List[Twist]):
         '''
@@ -73,19 +88,11 @@ class TransformableCylinder(Cylinder):
         super().__init__(radius, length)
         self.body_frame_direction = np.append(np.array(body_frame_direction) / np.linalg.norm(body_frame_direction), 0)
         self.reference_config = np.array(reference_config)
-        self.twists = twists
+        self.fk = ForwardKinematics(twists, reference_config)
         self.transform(np.zeros(len(twists)))
 
     def transform(self, joint_angles):
-        if len(joint_angles) < len(self.twists):
-            print("ERROR: not enough joint angles")
-            return
-        
-        body_to_base_tf = np.identity(4)
-        for i in range(len(self.twists)):
-            body_to_base_tf = body_to_base_tf @ self.twists[i].matrix_exponential(joint_angles[i])
-        body_to_base_tf = body_to_base_tf @ self.reference_config
-
+        body_to_base_tf = self.fk.body_to_base_tf(joint_angles)
         base_point = body_to_base_tf @ np.array([0, 0, 0, 1])
         direction = body_to_base_tf @ self.body_frame_direction
         self.set_base_point(base_point[:3])

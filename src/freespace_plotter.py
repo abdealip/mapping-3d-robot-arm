@@ -9,9 +9,11 @@ class ViewEnum(Enum):
     RIGHT = "right"
     FRONT = "front"
     TOP = "top"
+    ISO_BACK = "iso_back"
+    CUSTOM = "custom"
 
 class FreespacePlotter:
-    def __init__(self, view: ViewEnum, title, xlim, ylim, zlim, interactive=True) -> None:
+    def __init__(self, view: ViewEnum, title, xlim, ylim, zlim, interactive=True, elev=0, azim=0) -> None:
         if interactive:
             plt.ion()
 
@@ -29,12 +31,16 @@ class FreespacePlotter:
 
         if view == ViewEnum.ISO:
             self.ax.view_init(elev=30, azim=45)
+        elif view == ViewEnum.ISO_BACK:
+            self.ax.view_init(elev=30, azim=-135)
         elif view == ViewEnum.RIGHT:
             self.ax.view_init(elev=0, azim=0)
         elif view == ViewEnum.FRONT:
             self.ax.view_init(elev=0, azim=-90)
         elif view == ViewEnum.TOP:
             self.ax.view_init(elev=90, azim=-90)
+        elif view == ViewEnum.CUSTOM:
+            self.ax.view_init(elev=elev, azim=azim)
 
         plt.title(title)
 
