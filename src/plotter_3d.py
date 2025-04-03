@@ -12,13 +12,13 @@ class ViewEnum(Enum):
     ISO_BACK = "iso_back"
     CUSTOM = "custom"
 
-class FreespacePlotter:
-    def __init__(self, view: ViewEnum, title, xlim, ylim, zlim, interactive=True, elev=0, azim=0) -> None:
+class Plotter3D:
+    def __init__(self, view: ViewEnum, title, xlim, ylim, zlim, interactive=True, elev=0, azim=0, figsize=[6, 4]) -> None:
         if interactive:
             plt.ion()
 
         self.interactive = interactive
-        self.fig = plt.figure()
+        self.fig = plt.figure(figsize=figsize)
         self.ax = self.fig.add_subplot(projection='3d')
         self.ax.axes.set_xlim3d(xlim[0], xlim[1])
         self.ax.axes.set_ylim3d(ylim[0], ylim[1])
@@ -50,7 +50,7 @@ class FreespacePlotter:
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
 
-    def add_points(self, points, legend_str="Free"):
+    def add_points(self, points, legend_str):
         self.ax.scatter(points[:, 0], points[:, 1], points[:, 2], s=1, c="#1f77b4")
 
         if not self.legend_shown:
@@ -59,6 +59,15 @@ class FreespacePlotter:
 
         if self.interactive:
             self.update()
+
+    def set_view(self, elev, azim):
+        self.ax.view_init(elev, azim)
+
+    def set_axis_limits(self, xlim, ylim, zlim):
+        self.ax.axes.set_xlim3d(xlim[0], xlim[1])
+        self.ax.axes.set_ylim3d(ylim[0], ylim[1])
+        self.ax.axes.set_zlim3d(zlim[0], zlim[1])
+        self.ax.axes.set_box_aspect((1, 1, 1))
 
     def cleanup(self):
         plt.close(self.fig)

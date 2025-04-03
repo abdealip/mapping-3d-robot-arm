@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 import numpy as np
 import matplotlib.pyplot as plt
 
-from freespace_plotter import *
+from plotter_3d import *
 from forward_kinematics import Twist, ForwardKinematics
 
 class RangeImagePointCloud:
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     ripc = RangeImagePointCloud(fk)
     points = ripc.point_cloud_from_range_image(depth_image, joint_state)
 
-    plotter = FreespacePlotter(ViewEnum.ISO, "Test", [-5, 5], [-5, 5], [-5, 5], interactive=False)
+    plotter = Plotter3D(ViewEnum.ISO, "Test", [-5, 5], [-5, 5], [-5, 5], interactive=False)
 
     plotter.add_points(points, "Depth Points")
     plotter.update()
