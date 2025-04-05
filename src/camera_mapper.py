@@ -51,7 +51,6 @@ class CameraMapper:
     def write_point_cloud_to_file(self, filename):
         np.savetxt(filename, self.points)
 
-
     def write_map_to_file(self, map_filename):
         with open(map_filename, "w") as f:
             self.map.write_to_file(f)

@@ -12,6 +12,23 @@ class ViewEnum(Enum):
     ISO_BACK = "iso_back"
     CUSTOM = "custom"
 
+def bounding_cube(xlim, ylim, zlim):
+    xcenter = (xlim[0] + xlim[1])/2
+    ycenter = (ylim[0] + ylim[1])/2
+    zcenter = (zlim[0] + zlim[1])/2
+
+    xrange = xlim[1] - xlim[0]
+    yrange = ylim[1] - ylim[0]
+    zrange = zlim[1] - zlim[0]
+
+    range = max(xrange, yrange, zrange)
+
+    new_xlim = [xcenter - range/2, xcenter + range/2]
+    new_ylim = [ycenter - range/2, ycenter + range/2]
+    new_zlim = [zcenter - range/2, zcenter + range/2]
+
+    return new_xlim, new_ylim, new_zlim
+
 class Plotter3D:
     def __init__(self, view: ViewEnum, title, xlim, ylim, zlim, interactive=True, elev=0, azim=0, figsize=[6, 4]) -> None:
         if interactive:
@@ -20,9 +37,12 @@ class Plotter3D:
         self.interactive = interactive
         self.fig = plt.figure(figsize=figsize)
         self.ax = self.fig.add_subplot(projection='3d')
-        self.ax.axes.set_xlim3d(xlim[0], xlim[1])
-        self.ax.axes.set_ylim3d(ylim[0], ylim[1])
-        self.ax.axes.set_zlim3d(zlim[0], zlim[1])
+
+        xlim, ylim, zlim = bounding_cube(xlim, ylim, zlim)
+
+        self.ax.axes.set_xlim3d(*xlim)
+        self.ax.axes.set_ylim3d(*ylim)
+        self.ax.axes.set_zlim3d(*zlim)
         self.ax.axes.set_box_aspect((1, 1, 1))
 
         self.ax.set_xlabel("x")

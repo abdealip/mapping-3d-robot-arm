@@ -1,19 +1,2 @@
-Joint states published at 50 Hz
-
-Voxel Size, Update Time
-0.01, 0.854
-0.02, 0.115
-0.025, 0.063
-
-Things to include for report:
-- goals
-- algorithm overview
-- proof of concept - map from zero joint angles
-- relationship between voxel size and map update time
-- relationship between sample period, map quality, and runtime
-- (stretch goal) - video of map being updated in realtime
-- next steps (camera)
-
-TODO for code:
-- figure out how to make a video of the map being updated (multithreading probably)
-- shell script to do profiling for report stuff
+TODO:
+- write teachpendant program to travel between strategic poses, test each movement, write down instructions for demo

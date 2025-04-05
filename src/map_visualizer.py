@@ -14,14 +14,14 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("-m", "--map", type=str, required=True, help="Map File to Visualize")
     parser.add_argument("-t", "--title", type=str, default="Map", help="Plot Title")
-    parser.add_argument("-v", "--view", type=str, choices=[e.value for e in ViewEnum], default=ViewEnum.ISO.value)
+    parser.add_argument("-v", "--view", type=str, choices=[e.value for e in ViewEnum], default=ViewEnum.ISO_BACK.value)
     args = vars(parser.parse_args())
 
     with open(args["map"]) as f:
         grid = BooleanGrid3D.init_from_file(f)
-    freespace_points = np.array(grid.changed_points)
+    points = np.array(grid.changed_points)
 
     plotter = Plotter3D(ViewEnum(args["view"]), args["title"], [grid.xmin, grid.xmax],
                                [grid.ymin, grid.ymax], [grid.zmin, grid.zmax], interactive=False)
-    plotter.add_points(freespace_points)
+    plotter.add_points(points, "Depth Points")
     plt.show()
