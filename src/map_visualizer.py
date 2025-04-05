@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from argparse import ArgumentParser
 
 from grid3D import BooleanGrid3D
-from freespace_plotter import FreespacePlotter, ViewEnum
+from plotter_3d import Plotter3D, ViewEnum
 
 if __name__ == "__main__":
     base_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)))
@@ -21,7 +21,7 @@ if __name__ == "__main__":
         grid = BooleanGrid3D.init_from_file(f)
     freespace_points = np.array(grid.changed_points)
 
-    plotter = FreespacePlotter(ViewEnum(args["view"]), args["title"], [grid.xmin, grid.xmax],
+    plotter = Plotter3D(ViewEnum(args["view"]), args["title"], [grid.xmin, grid.xmax],
                                [grid.ymin, grid.ymax], [grid.zmin, grid.zmax], interactive=False)
     plotter.add_points(freespace_points)
     plt.show()

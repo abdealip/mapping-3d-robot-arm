@@ -8,7 +8,7 @@ from typing import List
 
 from grid3D import BooleanGrid3D
 from forward_kinematics import Twist, TransformableCylinder, joint_angles_close
-from freespace_plotter import ViewEnum, FreespacePlotter
+from plotter_3d import ViewEnum, Plotter3D
 
 exit_event = threading.Event()
 
@@ -46,7 +46,7 @@ class Mapper:
 
         self.do_live_display = do_live_display
         if self.do_live_display:
-            self.plotter = FreespacePlotter(ViewEnum.ISO, "Map", [self.map.xmin, self.map.xmax],
+            self.plotter = Plotter3D(ViewEnum.ISO, "Map", [self.map.xmin, self.map.xmax],
                                             [self.map.ymin, self.map.ymax], [self.map.zmin, self.map.zmax])
             self.plotter.update()
             self.video_dir = None

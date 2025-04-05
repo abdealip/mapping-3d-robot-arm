@@ -48,11 +48,12 @@ class Grid3D:
         grid.voxels = data.reshape(shape)
         return grid
 
-    def in_range(self, x, y, z) -> bool:
-        return (x > self.xmin and x < self.xmax and y > self.ymin and y < self.ymax and z > self.zmin and z < self.zmax)
-
     def idx_in_range(self, x_i, y_i, z_i) -> bool:
         return (x_i >= 0 and x_i < self.xdim and y_i >= 0 and y_i < self.ydim and z_i >= 0 and z_i < self.zdim)
+
+    def in_range(self, x, y, z) -> bool:
+        idxs = self.cartesian_to_idxs(x, y, z)
+        return self.idx_in_range(*idxs)
 
     def set_voxel_at(self, x, y, z, value):
         if self.in_range(x, y, z):
@@ -62,8 +63,8 @@ class Grid3D:
             print("ERROR: Out of range (set_voxel_at)")
 
     def get_voxel_at(self, x, y, z):
-        if self.in_range(x, y, z):
-            idxs = self.cartesian_to_idxs(x, y, z)
+        idxs = self.cartesian_to_idxs(x, y, z)
+        if self.idx_in_range(*idxs):
             return self.voxels[idxs[0], idxs[1], idxs[2]]
         else:
             print("ERROR: Out of range (get_voxel_at)")
@@ -150,7 +151,7 @@ class BooleanGrid3D(Grid3D):
 
         # list of points whose value is 0
         self.changed_points = []
-        self.num_free_start = 0
+        self.num_changed_start = 0
 
     @classmethod
     def init_from_file(cls, f):
@@ -172,6 +173,11 @@ class BooleanGrid3D(Grid3D):
         grid.changed_points = grid.get_all_points_matching_value(0)
         return grid
 
+    def set_voxel_at(self, x, y, z):
+        if self.in_range(x, y, z) and self.get_voxel_at(x, y, z):
+            self.changed_points.append([x, y, z])
+            super().set_voxel_at(x, y, z, 0)
+
     def set_voxel_at_idx(self, x_i, y_i, z_i):
         if self.idx_in_range(x_i, y_i, z_i):
             if self.voxels[x_i, y_i, z_i]:
@@ -181,7 +187,7 @@ class BooleanGrid3D(Grid3D):
             print("ERROR: Out of range (set_voxel_at_idx)")
 
     def mark_start_of_update(self):
-        self.num_free_start = len(self.changed_points)
+        self.num_changed_start = len(self.changed_points)
 
     def update_points_within_cylinder(self, cylinder: Cylinder):
         bounds = self.cylinder_bounding_box(cylinder)
@@ -193,7 +199,12 @@ class BooleanGrid3D(Grid3D):
                         self.set_voxel_at_idx(xi, yi, zi)
 
     def get_changed_points_since_update(self):
-        return np.array(self.changed_points[self.num_free_start:])
+        return np.array(self.changed_points[self.num_changed_start:])
 
-    def get_num_free_cells(self):
+    def get_num_changed_cells(self):
         return len(self.changed_points)
+
+    def set_voxels_from_point_cloud(self, point_cloud):
+        for point in point_cloud:
+            if self.in_range(*point):
+                self.set_voxel_at(*point)
