@@ -55,6 +55,15 @@ class CameraMapper:
         with open(map_filename, "w") as f:
             self.map.write_to_file(f)
 
+def rmdir_recursive(dir):
+    for name in os.listdir(dir):
+        path = os.path.join(dir, name)
+        if os.path.isfile(path):
+            os.remove(path)
+        else:
+            rmdir_recursive(path)
+    os.rmdir(dir)
+
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("-i", "--input", default=None, help="Input Directory with frame subdirs containing depth images and joint states")
@@ -94,6 +103,17 @@ if __name__ == "__main__":
     else:
         if options.output == None:
             print("If not running in offline mode, must specify output directory")
+            exit(1)
+
+        if os.path.isdir(options.output):
+            res = input(f"Warning: Directory {options.output} exists. Overwrite? [y/n] ")
+            while res not in ["y", "n"]:
+                res = input("Please type y to overwrite, n to cancel: ")
+            if res == "y":
+                rmdir_recursive(options.output)
+            else:
+                exit(0)
+        os.mkdir(options.output)
 
         cjt = CameraJointTracker()
         point_cloud_plotter = Plotter3D(ViewEnum.ISO_BACK, "Point Cloud", cm.x_range, cm.y_range, cm.z_range, figsize=[7, 7])
@@ -124,7 +144,8 @@ if __name__ == "__main__":
             new_points_raw, new_points_rasterized = cm.process_snapshot(depth_image, joint_state)
             print(f"Added {len(new_points_raw)} raw points")
             print(f"Added {len(new_points_rasterized)} rasterized points")
-            point_cloud_plotter.add_points(new_points_rasterized, "Rasterized Depth Points")
+            # point_cloud_plotter.add_points(new_points_rasterized, "Rasterized Depth Points")
+            point_cloud_plotter.add_points(new_points_raw, "Depth Points")
 
             cjt.camera.save_rgb_image(color_image, os.path.join(outpath, "color.png"))
             cjt.camera.save_depth_image(depth_image, os.path.join(outpath, "depth.txt"))

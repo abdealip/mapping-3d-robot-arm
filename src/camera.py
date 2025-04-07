@@ -66,7 +66,7 @@ class Camera:
         ax.set_title("RGB Image")
 
     def save_depth_image(self, depth_image, out_file):
-        np.savetxt(depth_image, out_file)
+        np.savetxt(out_file, depth_image)
 
     def save_rgb_image(self, color_image, out_file):
         image = Image.fromarray(color_image)

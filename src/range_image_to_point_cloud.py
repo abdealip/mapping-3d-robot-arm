@@ -31,8 +31,8 @@ class RangeImagePointCloud:
                     continue
                 if depth_value < self.range[0] or depth_value > self.range[1]:
                     continue
-                horizontal_angle = (self.fov[0]/2 - col_i * horizontal_degrees_per_pixel) * np.pi/180
-                vertical_angle = (self.fov[1]/2 - row_i * vertical_degrees_per_pixel) * np.pi/180
+                horizontal_angle = (-self.fov[0]/2 + col_i * horizontal_degrees_per_pixel) * np.pi/180
+                vertical_angle = (-self.fov[1]/2 + row_i * vertical_degrees_per_pixel) * np.pi/180
 
                 z = depth_value / 1000
                 y = z*np.tan(vertical_angle)

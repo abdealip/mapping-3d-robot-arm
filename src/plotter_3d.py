@@ -71,6 +71,8 @@ class Plotter3D:
         self.fig.canvas.flush_events()
 
     def add_points(self, points, legend_str):
+        if len(points) == 0:
+            return
         self.ax.scatter(points[:, 0], points[:, 1], points[:, 2], s=1, c="#1f77b4")
 
         if not self.legend_shown:
