@@ -1,2 +1,23 @@
 TODO:
-- write teachpendant program to travel between strategic poses, test each movement, write down instructions for demo
+
+- take video of camera mapping process
+
+{
+- get dimensions of CNC machines and tubelights and populate environment.json
+- make environment_rasterizer consume groups of polygons rather than single polygons
+  - write the point cloud for each group of polygons to a file in a directory
+} OR
+{
+  - create a program to turn an STL file into a point cloud
+}
+
+- implement ICP or robust ICP or some point cloud registration method to register the
+  expected environment with the actual environment - this should consume a list of 
+  {STL_file, transform} and output a list of {STL_file, transform_corrected}
+
+- write a program to consume a list of {STL_file, transform_corrected} and output the result
+  to a single STL file
+
+- edit scene_manager to consume the resultant stl (as an argument)
+
+- test to see if it displays properly in rviz

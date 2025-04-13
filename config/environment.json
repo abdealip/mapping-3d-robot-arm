@@ -1,0 +1,55 @@
+{
+    "parameters": {
+        "point_density": 0.02
+    },
+    "polygons": [
+        {
+            "description": "front of left CNC",
+            "transform": [[1, 0, 0, 0],
+                          [0, 0, -1, 0.7],
+                          [0, 1, 0, 0.6],
+                          [0, 0, 0, 1]],
+            "outer_points": [
+                [-1, -1],
+                [-1, 0],
+                [-0.2, 1],
+                [1, 1],
+                [1, -1]
+            ],
+            "inner_points": [
+                [-0.5, -0.2],
+                [0, 0.8],
+                [0.2, 0.8],
+                [0.2, -0.2]
+            ]
+        },
+        {
+            "description":"front of right CNC",
+            "transform": [[0, 0, -1, 0.7],
+                          [-1, 0, 0, 0],
+                          [0, 1, 0, 0.6],
+                          [0, 0, 0, 1]],
+            "outer_points": [
+                [-1, -1],
+                [-1, 0],
+                [-0.2, 1],
+                [1, 1],
+                [1, -1]
+            ],
+            "inner_points": [
+                [-0.5, -0.2],
+                [0, 0.8],
+                [0.2, 0.8],
+                [0.2, -0.2]
+            ]
+        }
+    ],
+    "cylinders": [
+        {
+            "base_point": [],
+            "direction": [],
+            "radius": 0.02,
+            "length": 0.5
+        }
+    ]
+}
