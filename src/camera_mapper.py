@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import rospy
 
+from dir_util import clear_and_mkdir_with_confirmation
 from plotter_3d import *
 from camera_joint_snapshot import CameraJointTracker
 from forward_kinematics import Twist, ForwardKinematics
@@ -55,15 +56,6 @@ class CameraMapper:
         with open(map_filename, "w") as f:
             self.map.write_to_file(f)
 
-def rmdir_recursive(dir):
-    for name in os.listdir(dir):
-        path = os.path.join(dir, name)
-        if os.path.isfile(path):
-            os.remove(path)
-        else:
-            rmdir_recursive(path)
-    os.rmdir(dir)
-
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("-i", "--input", default=None, help="Input Directory with frame subdirs containing depth images and joint states")
@@ -105,15 +97,7 @@ if __name__ == "__main__":
             print("If not running in offline mode, must specify output directory")
             exit(1)
 
-        if os.path.isdir(options.output):
-            res = input(f"Warning: Directory {options.output} exists. Overwrite? [y/n] ")
-            while res not in ["y", "n"]:
-                res = input("Please type y to overwrite, n to cancel: ")
-            if res == "y":
-                rmdir_recursive(options.output)
-            else:
-                exit(0)
-        os.mkdir(options.output)
+        clear_and_mkdir_with_confirmation(options.output)
 
         cjt = CameraJointTracker()
         point_cloud_plotter = Plotter3D(ViewEnum.ISO_BACK, "Point Cloud", cm.x_range, cm.y_range, cm.z_range, figsize=[7, 7])

@@ -64,21 +64,20 @@ class Plotter3D:
 
         plt.title(title)
 
-        self.legend_shown = False
-
     def update(self):
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
 
-    def add_points(self, points, legend_str):
+    def add_points(self, points, color='#1f77b4'):
         if len(points) == 0:
             return
-        self.ax.scatter(points[:, 0], points[:, 1], points[:, 2], s=1, c="#1f77b4")
+        self.ax.scatter(points[:, 0], points[:, 1], points[:, 2], s=1, c=color)
 
-        if not self.legend_shown:
-            plt.legend([legend_str])
-            self.legend_shown = True
+        if self.interactive:
+            self.update()
 
+    def add_legend(self, legend):
+        plt.legend(legend)
         if self.interactive:
             self.update()
 

@@ -1,16 +1,9 @@
 TODO:
-
-- edit and upload video of camera mapping process
-
 - implement ICP or robust ICP or some point cloud registration method to register the
   expected environment with the actual environment - this should consume a list of 
   {STL_file, transform} and output a list of {STL_file, transform_corrected}
-
 - write a program to consume a list of {STL_file, transform_corrected} and output the result
   to a single STL file
-
 - edit scene_manager to consume the resultant stl (as an argument)
-
-- test to see if it displays properly in rviz
-
+- test on lab computer to see if it displays properly in rviz
 - write paper and documentation
