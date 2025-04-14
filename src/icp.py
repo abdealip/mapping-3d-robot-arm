@@ -70,3 +70,18 @@ def icp(base_points, src_points, max_iterations=50, tolerance=1e-6):
 
     aligned_points = src_h[:, :3]
     return aligned_points, final_transform
+
+def mean_registration_error(base_points, src_points):
+    """
+    Compute the mean nearest-neighbor distance from src_points to base_points.
+
+    Parameters:
+        base_points (np.ndarray): Nx3 array of base (reference) point cloud.
+        src_points (np.ndarray): Mx3 array of source point cloud.
+
+    Returns:
+        float: Mean registration error (average distance to nearest neighbor).
+    """
+    tree = cKDTree(base_points)
+    distances, _ = tree.query(src_points)
+    return np.mean(distances)

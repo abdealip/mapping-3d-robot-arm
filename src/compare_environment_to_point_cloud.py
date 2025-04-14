@@ -8,6 +8,7 @@ from grid3D import BooleanGrid3D
 from argparse import ArgumentParser
 from plotter_3d import Plotter3D, ViewEnum
 from dir_util import make_filename
+from icp import mean_registration_error
 
 if __name__ == "__main__":
     parser = ArgumentParser()
@@ -35,11 +36,13 @@ if __name__ == "__main__":
     colors = ['tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan']
     i = 0
     for mesh in env_json["meshes"]:
-        tf_prior = np.array(mesh["transform"])
         point_cloud = np.loadtxt(os.path.join(options.input, make_filename(mesh["description"], "txt")))
 
         plotter.add_points(point_cloud, color=colors[i])
         legend.append(mesh["description"])
+
+        mean_error = mean_registration_error(grid.changed_points, point_cloud)
+        print(f"Mean error for {mesh['description']}: {mean_error}")
 
         i = (i + 1) % len(colors)
 

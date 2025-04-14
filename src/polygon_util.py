@@ -64,6 +64,9 @@ class Polygon3D:
         if len(points_3d) < 3:
             raise ValueError("Polygon must have at least 3 vertices.")
         self.points = np.array(points_3d)
+        self.calculate_bounds()
+
+    def calculate_bounds(self):
         self.xmin = np.min(self.points[:, 0])
         self.xmax = np.max(self.points[:, 0])
         self.ymin = np.min(self.points[:, 1])
@@ -133,3 +136,12 @@ class Polygon3D:
                 y += dist_between_points
             x += dist_between_points
         return np.array(points)
+
+    def transform(self, tf: np.ndarray):
+        '''
+        tf: SE(3) transform to apply to self
+        '''
+        points_homog = np.hstack([self.points, np.ones([len(self.points), 1])])
+        points_homog_new = (tf @ points_homog.T).T
+        self.points = points_homog_new[:, :3]
+        self.calculate_bounds()
