@@ -30,7 +30,7 @@ def bounding_cube(xlim, ylim, zlim):
     return new_xlim, new_ylim, new_zlim
 
 class Plotter3D:
-    def __init__(self, view: ViewEnum, title, xlim, ylim, zlim, interactive=True, elev=0, azim=0, figsize=[6, 4]) -> None:
+    def __init__(self, view: ViewEnum, title, xlim, ylim, zlim, interactive=False, elev=0, azim=0, figsize=[6, 4]) -> None:
         if interactive:
             plt.ion()
 

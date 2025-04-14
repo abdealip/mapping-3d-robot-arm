@@ -1,15 +1,6 @@
 TODO:
 
-- take video of camera mapping process
-
-{
-- get dimensions of CNC machines and tubelights and populate environment.json
-- make environment_rasterizer consume groups of polygons rather than single polygons
-  - write the point cloud for each group of polygons to a file in a directory
-} OR
-{
-  - create a program to turn an STL file into a point cloud
-}
+- edit and upload video of camera mapping process
 
 - implement ICP or robust ICP or some point cloud registration method to register the
   expected environment with the actual environment - this should consume a list of 
@@ -21,3 +12,5 @@ TODO:
 - edit scene_manager to consume the resultant stl (as an argument)
 
 - test to see if it displays properly in rviz
+
+- write paper and documentation

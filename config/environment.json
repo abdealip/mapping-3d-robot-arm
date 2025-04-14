@@ -1,55 +1,21 @@
 {
-    "parameters": {
-        "point_density": 0.02
-    },
-    "polygons": [
+    "point_density": 0.02,
+    "meshes": [
         {
             "description": "front of left CNC",
-            "transform": [[1, 0, 0, 0],
-                          [0, 0, -1, 0.7],
-                          [0, 1, 0, 0.6],
+            "transform": [[1, 0, 0, -0.30],
+                          [0, 0, -1, 0.65],
+                          [0, 1, 0, -0.18],
                           [0, 0, 0, 1]],
-            "outer_points": [
-                [-1, -1],
-                [-1, 0],
-                [-0.2, 1],
-                [1, 1],
-                [1, -1]
-            ],
-            "inner_points": [
-                [-0.5, -0.2],
-                [0, 0.8],
-                [0.2, 0.8],
-                [0.2, -0.2]
-            ]
+            "model": "cnc_front.stl"
         },
         {
             "description":"front of right CNC",
-            "transform": [[0, 0, -1, 0.7],
-                          [-1, 0, 0, 0],
-                          [0, 1, 0, 0.6],
+            "transform": [[0, 0, -1, 0.78],
+                          [-1, 0, 0, 0.35],
+                          [0, 1, 0, -0.18],
                           [0, 0, 0, 1]],
-            "outer_points": [
-                [-1, -1],
-                [-1, 0],
-                [-0.2, 1],
-                [1, 1],
-                [1, -1]
-            ],
-            "inner_points": [
-                [-0.5, -0.2],
-                [0, 0.8],
-                [0.2, 0.8],
-                [0.2, -0.2]
-            ]
-        }
-    ],
-    "cylinders": [
-        {
-            "base_point": [],
-            "direction": [],
-            "radius": 0.02,
-            "length": 0.5
+            "model": "cnc_front.stl"
         }
     ]
 }
