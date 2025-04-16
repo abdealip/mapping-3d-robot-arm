@@ -1,4 +1,2 @@
 TODO:
-- edit scene_manager to consume the resultant stl (as an argument)
-- test on lab computer to see if it displays properly in rviz
 - write paper and documentation
