@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import matplotlib.cm
 import matplotlib.figure
 import pyrealsense2 as rs

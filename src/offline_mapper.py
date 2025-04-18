@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import os
-import time
 import pandas as pd
 from argparse import ArgumentParser
 

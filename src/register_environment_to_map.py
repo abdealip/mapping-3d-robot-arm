@@ -50,5 +50,8 @@ if __name__ == "__main__":
 
         np.savetxt(os.path.join(options.output_pc, make_filename(mesh["description"], "txt")), aligned_pts)
 
+    # transform from map frame to rviz frame
+    new_env_json["global_transform"] = env_json["global_transform"]
+
     with open(options.output, "w") as f:
         json.dump(new_env_json, f, indent=4)
