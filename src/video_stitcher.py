@@ -13,26 +13,12 @@ class VideoStitcher:
         self.index = pd.read_csv(os.path.join(video_dir, "img_index.csv"))
 
     def make_video(self):
-        # last_timestamp = None
-        # last_img = None
-        # frames_written = 0
         n_rows = len(self.index)
         for i in range(n_rows):
             row = self.index.iloc[i]
-            # timestamp = row["timestamp"]
             img = cv2.imread(os.path.join(self.video_dir, row["imgfile"]))
-            # if last_timestamp == None:
-            #     self.video.write(img)
-            #     frames_written += 1
-            # else:
-            #     while timestamp > last_timestamp + self.frame_period:
-            #         self.video.write(last_img)
-            #         frames_written += 1
             self.video.write(img)
-            #     frames_written += 1
             print(f"Iteration {i+1}/{n_rows}")
-            # last_timestamp = timestamp
-            # last_img = img
         self.video.release()
 
 if __name__ == "__main__":

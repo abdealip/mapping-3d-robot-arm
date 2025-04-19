@@ -17,7 +17,7 @@ if __name__ == "__main__":
     env_json_file = os.path.join(repo_dir, "config", "environment.json")
 
     parser.add_argument("-e", "--env", default=env_json_file, help="environment json file")
-    parser.add_argument("-t", "--title", default="Environment from CAD Models", help="environment json file")
+    parser.add_argument("-t", "--title", default="Environment from CAD Models", help="Plot Title")
 
     options = parser.parse_args()
 

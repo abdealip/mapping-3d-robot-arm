@@ -46,6 +46,7 @@ class RangeImagePointCloud:
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("-i", "--input", required=True, help="Input Directory with Depth Image and Joint States")
+    parser.add_argument("-o", "--output", default=None, help="Output file to save resulting point cloud")
     base_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)))
     config_file_default = os.path.join(base_dir, "config", "map_config.json")
     parser.add_argument("-c", "--config", type=str, default=config_file_default, help=f"JSON Configuration File (default: {config_file_default})")
@@ -73,7 +74,8 @@ if __name__ == "__main__":
     plotter.add_points(points, "Depth Points")
     plotter.update()
 
-    print(len(points))
+    if (options.output != None):
+        np.savetxt(options.output, points)
 
     plt.savefig("test.png")
     plt.show()

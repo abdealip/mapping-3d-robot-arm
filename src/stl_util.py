@@ -7,6 +7,7 @@ import numpy as np
 from polygon_util import Polygon3D
 from plotter_3d import Plotter3D, ViewEnum
 import matplotlib.pyplot as plt
+from argparse import ArgumentParser
 
 class STL:
     def __init__(self, stl_filename):
@@ -83,13 +84,17 @@ class STL:
         self.mesh.save(output_stl_path)
 
 if __name__ == "__main__":
-    file = "models/cnc_front.stl"
+    parser = ArgumentParser()
+    parser.add_argument('-i', "--input", default="models/cnc_front.stl", help="Input STL file to build a point cloud from")
+    parser.add_argument('-r', "--resolution", default=0.02, help="Distance between adjacent points in the point cloud (in meters)")
+    parser.add_argument('-t', "--title", default="cnc_front_untransformed", help="Plot Title")
 
-    s = STL(file)
-    points = s.get_rasterized_points(0.02)
-    print(len(points))
+    options = parser.parse_args()
 
-    p = Plotter3D(ViewEnum.ISO_BACK, "cnc_front_untransformed", [-0.1, 0.8], [-0.1, 0.8], [-0.45, 0.45])
+    s = STL(options.input)
+    points = s.get_rasterized_points(options.resolution)
+
+    p = Plotter3D(ViewEnum.ISO_BACK, options.title, [-0.1, 0.8], [-0.1, 0.8], [-0.45, 0.45])
 
     p.add_points(points, "stl")
 
