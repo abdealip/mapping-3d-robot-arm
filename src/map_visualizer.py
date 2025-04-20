@@ -23,5 +23,5 @@ if __name__ == "__main__":
 
     plotter = Plotter3D(ViewEnum(args["view"]), args["title"], [grid.xmin, grid.xmax],
                                [grid.ymin, grid.ymax], [grid.zmin, grid.zmax], interactive=False)
-    plotter.add_points(points, "Depth Points")
+    plotter.add_points(points)
     plt.show()
